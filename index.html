@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Crossy Road Reimagined</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <style>
+            /*main font size for elements*/
+            * {
+                font-size: 24px;
+            }
+
+            /*html body styling*/
+            body {
+                background: black;
+                color: white;
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                -webkit-box-pack: center;
+                -ms-flex-pack: center;
+                justify-content: center;
+                -webkit-box-align: start;
+                -ms-flex-align: start;
+                align-items: start;
+                height: 100vh;
+                width: 100vw;
+                margin: 0;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            /*styling for game area element*/
+            canvas {
+                display: none;
+                background: green;
+                aspect-ratio: 4 / 3;
+                width: auto;
+                height: 100%;
+                max-width: 100vw;
+                max-height: 100vh;
+            }
+
+            /*html form styling*/
+            form {
+                padding: 50px 75px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border: 1px solid #fff;
+                border-radius: 10px;
+                text-align: center;
+            }
+
+            /*username input area styling*/
+            input[type="text"] {
+                width: calc(100% - 22px);
+                padding: 10px 5px;
+                margin: 10px auto;
+                display: block;
+                border: 1px solid #fff;
+                border-radius: 5px;
+                background-color: rgba(255, 255, 255, 0.1);
+                color: #fff;
+            }
+
+            /*html button styling*/
+            input[type="submit"], button {
+                width: calc(100% - 22px);
+                background-color: #00f;
+                color: #fff;
+                border: none;
+                padding: 20px 5px;
+                cursor: pointer;
+                border-radius: 5px;
+                -webkit-transition: background-color 0.5s;
+                -o-transition: background-color 0.5s;
+                transition: background-color 0.5s;
+                overflow-x: hidden;
+            }
+
+            /*on hover styling*/
+            input[type="submit"]:hover, button:hover {
+                background-color: #00b;
+            }
+
+            /*form area styling*/
+            aside {
+                font-size: 20px;
+                margin: 20px;
+            }
+
+            /*main container styling*/
+            #container {
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                -webkit-box-orient: vertical;
+                -webkit-box-direction: normal;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                overflow-x: hidden;
+            }
+
+            /*svg styling*/
+            #container > svg {
+                margin-top: 20px;
+            }
+
+            /*music switch styling*/
+            #switch {
+                left: auto;
+                position: relative;
+                display: block;
+                width: 80px;
+                height: 40px;
+                margin: auto;
+                font-size: 25px;
+            }
+
+            /*music slider styling*/
+            #slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #bbb;
+                -webkit-transition: background-color 0.5s;
+                -o-transition: background-color 0.5s;
+                transition: background-color 0.5s;
+                border-radius: 20px;
+            }
+
+            /*music slider styling*/
+            #slider:before {
+                position: absolute;
+                content: "";
+                height: 32px;
+                width: 32px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                -webkit-transition: -webkit-transform 0.5s;
+                transition: -webkit-transform 0.5s;
+                -o-transition: transform 0.5s;
+                transition: transform 0.5s;
+                border-radius: 20px;
+            }
+
+            /*music switched slider styling*/
+            input:checked + #slider {
+                background-color: #00f;
+            }
+
+            input:checked + #slider:before {
+                -webkit-transform: translateX(40px);
+                -ms-transform: translateX(40px);
+                transform: translateX(40px);
+            }
+
+            /*music switched slider styling*/
+            #highscorePage {
+                display: none;
+                padding: 50px 75px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                border: 1px solid #fff;
+                text-align: center;
+            }
+
+            /*highscore list styling*/
+            #highscoreList {
+                display: -webkit-box;
+                display: -ms-flexbox;
+                display: flex;
+                font-size: 48px;
+                font-weight: bold;
+                max-height: 500px;
+                overflow-y: auto;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                border: 1px solid #fff;
+            }
+
+            /*highscore list styling*/
+            #highscoreList > ul {
+                list-style-type: none;
+                text-align: left;
+                padding: 20px 40px;
+                margin: 10px;
+                white-space: nowrap;
+            }
+
+            /*styling for width < 375px*/
+            @media (max-width: 375px) {
+                * {
+                    font-size: 18px;
+                }
+
+                form, #highscorePage {
+                    padding: 50px 50px;
+                }
+            }
+
+            /*styling for width < 320px*/
+            @media (max-width: 320px) {
+                * {
+                    font-size: 16px;
+                }
+
+                form, #highscorePage {
+                    padding: 50px 25px;
+                }
+            }
+
+            /*styling for width < 192px*/
+            @media (max-width: 192px) {
+                #container {
+                    visibility: hidden;
+                }
+            }
+
+            /*styling ratio for width/height ratio < 4/3*/
+            @media (max-aspect-ratio: 4/3) {
+                canvas {
+                    -webkit-transform: rotate(90deg);
+                    -ms-transform: rotate(90deg);
+                    transform: rotate(90deg);
+                    height: auto;
+                    max-height: 75vh;
+                    max-width: calc(400vw / 3);
+                }
+            }
+        </style>
+        <link rel="icon" type="image/png" sizes="50x50" href="image/favicon-50x50.png">
+    </head>
+    <body>
+        <div id="container">
+            <svg width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 25 40 Q 15 30, 5 40 Q 15 50, 25 40" fill="orange"/>
+                <line x1="85" y1="125" x2="85" y2="145" stroke="orange" stroke-width="5"/>
+                <line x1="85" y1="145" x2="80" y2="150" stroke="orange" stroke-width="5"/>
+                <line x1="85" y1="145" x2="90" y2="150" stroke="orange" stroke-width="5"/>
+                <line x1="125" y1="125" x2="125" y2="145" stroke="orange" stroke-width="5"/>
+                <line x1="125" y1="145" x2="120" y2="150" stroke="orange" stroke-width="5"/>
+                <line x1="125" y1="145" x2="130" y2="150" stroke="orange" stroke-width="5"/>
+                <ellipse cx="105" cy="90" rx="80" ry="40" fill="yellow"/>
+                <circle cx="45" cy="40" r="30" fill="yellow"/>
+                <circle cx="35" cy="30" r="5" fill="black"/>
+                <path d="M 145 90 Q 75 60, 65 90 Q 75 120, 145 90" fill="orange"/>
+                <text id="usernameSVG" x="95%" y="140" text-anchor="end" fill="yellow" stroke="orange">Your highscore: 0</text>
+            </svg>
+            <form id="gameForm">
+                <h1>CROSSY ROAD REIMAGINED</h1>
+                <label for="username">Enter your username:</label>
+                <aside>
+                    <input type="text" id="username" name="username" placeholder="Username..." autocomplete="Username" autofocus required minlength="2" maxlength="12">
+                    <br>
+                    <input type="submit" value="Start game">
+                </aside>
+                <aside>
+                    <button type="button">Highscores</button>
+                </aside>
+                <aside>
+                    <audio id="music" src="audio/menu.mp3" loop></audio>
+                    <span>Menu music switch:</span>
+                    <label id="switch">
+                        <input type="checkbox" id="checkBox" onchange="toggle(this)" checked>
+                        <span id="slider"></span>
+                    </label>
+                </aside>
+            </form>
+            <div id="highscorePage">
+                <button>Back to menu</button>
+                <h1>Highscores:</h1>
+                <div id="highscoreList">
+                    <ul></ul>
+                    <ul></ul>
+                </div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="1024" height="768"></canvas>
+        <script>
+            // History API implementation
+            document.addEventListener("DOMContentLoaded", () => {
+                let currentState = 0;
+
+                const navigateTo = url => {
+                    history.pushState(null, null, url);
+                    router();
+                };
+
+                const router = () => {
+                    if (loadedGame && !gameQuit) {
+                        history.go(currentState - 1);
+                        return;
+                    }
+
+                    currentState = history.state;
+
+                    const routes = [
+                        {path: "/", page: () => ""},
+                        {path: "/score", page: () => "score"}
+                    ];
+
+                    const potentialMatches = routes.map(route => {
+                        return {
+                            route: route,
+                            isMatch: location.pathname === route.path
+                        };
+                    });
+
+                    let match = potentialMatches.find(potentialMatch => potentialMatch.isMatch);
+
+                    if (!match) {
+                        match = {
+                            route: routes[0],
+                            isMatch: true
+                        };
+                    }
+
+                    switch (match.route.page()) {
+                        case "score":
+                            form.style.display = "none";
+                            scoreboard.style.display = "block";
+                            const scores = [];
+                            for (let i = 0; i < localStorage.length; i++) scores.push([localStorage.key(i), localStorage.getItem(localStorage.key(i))]);
+                            scores.sort((first, second) => second[1] - first[1]);
+
+                            for (let i = 0; i < scores.length; i++) {
+                                let li = document.createElement("li");
+                                li.innerHTML = (i + 1) + ". " + scores[i][0];
+                                highscores.children[0].appendChild(li);
+                                li = document.createElement("li");
+                                li.innerHTML = scores[i][1];
+                                highscores.children[1].appendChild(li);
+                            }
+
+                            break;
+                        default:
+                            scoreboard.style.display = "none";
+                            form.style.display = "block";
+                            highscores.children[0].innerHTML = "";
+                            highscores.children[1].innerHTML = "";
+                    }
+                };
+
+                window.addEventListener("popstate", router);
+
+                document.body.addEventListener("click", e => {
+                    if (e.target.matches("aside > button")) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        navigateTo("/score");
+                    } else if (e.target.matches("#highscorePage > button")) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        navigateTo("/");
+                    }
+                });
+
+                router();
+            });
+
+            // Offline app functionality
+            if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js").then(() => console.log("Service Worker registered successfully.")).catch(error => console.error("Service Worker registration failed:", error));
+
+            // There are 14 chunks on the screen at the same time. Chunk represents a set of 18 squares
+            class Chunk {
+                // Chunk initialization
+                constructor(elements, type, previousDirection, previousSpeed) {
+                    this.elements = elements;
+                    this.type = type;
+                    this.horizontalStep = 0;
+                    this.horizontalSpeed = type === 1 ? Math.floor(Math.random() * 3) + 3 : type === 2 ? Math.floor(Math.random() * 3) + 21 : type === 3 ? Math.floor(Math.random() * 3) + 3 : 0;
+                    this.rightDirection = Math.round(Math.random());
+
+                    if (this.rightDirection === previousDirection) {
+                        if (Math.random() < 0.5) {
+                            this.rightDirection = (this.rightDirection) ? 0 : 1;
+                        } else if (this.horizontalSpeed === previousSpeed) {
+                            if (this.horizontalSpeed === 3) this.horizontalSpeed++;
+                            else if (this.horizontalSpeed === 5) this.horizontalSpeed--;
+                            else Math.random() < 0.5 ? this.horizontalSpeed++ : this.horizontalSpeed--;
+                        }
+                    }
+
+                    this.loadingCar = 0;
+                    this.loadingTruck = 0;
+                    this.loadingTrain = 0;
+                    this.loadingLog4 = 0;
+                    this.loadingLog3 = 0;
+                    this.loadingLog2 = 0;
+                }
+
+                // Move elements forward if not plain chunk
+                stepElements(player) {
+                    if (this.type !== 0) this.moveElements(player);
+                }
+
+                // Element movement functionality
+                moveElements(player) {
+                    const step = this.rightDirection ? this.horizontalSpeed : -this.horizontalSpeed;
+                    this.horizontalStep += step;
+
+                    if (this.horizontalStep >= Math.floor(unit / 2) || this.horizontalStep <= Math.floor(-unit / 2)) {
+                        if (player !== null) {
+                            if (this.rightDirection) player.x++;
+                            else player.x--;
+                        }
+
+                        this.generateNewElement();
+                        this.horizontalStep = this.rightDirection ? this.horizontalStep - unit : this.horizontalStep + unit;
+                    }
+                }
+
+                // New element generation
+                generateNewElement() {
+                    for (let i = this.rightDirection ? 17 : 0; this.rightDirection ? i > 0 : i < 17; this.rightDirection ? i-- : i++) this.elements[i] = this.elements[this.rightDirection ? i - 1 : i + 1];
+                    this.loadNewElement();
+                    this.updateAudio();
+                }
+
+                // Update audio effects
+                updateAudio() {
+                    let carVolume = 0;
+                    let truckVolume = 0;
+                    let trainVolume = 0;
+
+                    for (let y = player.y - 3; y < player.y + 4; y++) {
+                        for (let x = player.x - 3; x < player.x + 4; x++) {
+                            if (y > -1 && y < 14 && x > -1 && x < 18) {
+                                if (chunks[y].type === 1) {
+                                    if (chunks[y].elements[x] > 2 && chunks[y].elements[x] < 5) {
+                                        if (carVolume < 0.1 && (y === player.y - 3 || y === player.y + 3 || x === player.x - 3 || x === player.x + 3)) carVolume = 0.1;
+                                        else if (carVolume < 0.2 && (y === player.y - 2 || y === player.y + 2 || x === player.x - 2 || x === player.x + 2)) carVolume = 0.2;
+                                        else if (carVolume < 0.4 && (y === player.y - 1 || y === player.y + 1 || x === player.x - 1 || x === player.x + 1)) carVolume = 0.4;
+                                        else if (carVolume < 0.8 && (y === player.y || x === player.x)) carVolume = 0.8;
+                                    } else if (chunks[y].elements[x] > 4) {
+                                        if (truckVolume < 0.0125 && (y === player.y - 3 || y === player.y + 3 || x === player.x - 3 || x === player.x + 3)) truckVolume = 0.0125;
+                                        else if (truckVolume < 0.025 && (y === player.y - 2 || y === player.y + 2 || x === player.x - 2 || x === player.x + 2)) truckVolume = 0.025;
+                                        else if (truckVolume < 0.05 && (y === player.y - 1 || y === player.y + 1 || x === player.x - 1 || x === player.x + 1)) truckVolume = 0.05;
+                                        else if (truckVolume < 0.1 && (y === player.y || x === player.x)) truckVolume = 0.1;
+                                    }
+                                } else if (chunks[y].type === 2 && chunks[y].elements[x] > 2) {
+                                    if (trainVolume < 0.05 && (y === player.y - 3 || y === player.y + 3 || x === player.x - 3 || x === player.x + 3)) trainVolume = 0.05;
+                                    else if (trainVolume < 0.1 && (y === player.y - 2 || y === player.y + 2 || x === player.x - 2 || x === player.x + 2)) trainVolume = 0.1;
+                                    else if (trainVolume < 0.2 && (y === player.y - 1 || y === player.y + 1 || x === player.x - 1 || x === player.x + 1)) trainVolume = 0.2;
+                                    else if (trainVolume < 0.4 && (y === player.y || x === player.x)) trainVolume = 0.4;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!gamePaused) {
+                        audio.car.volume = carVolume;
+                        if (audio.car.volume !== 0 && audio.car.paused) audio.car.play();
+                        else if (audio.car.volume === 0 && !audio.car.paused) audio.car.pause();
+                        audio.truck.volume = truckVolume;
+                        if (audio.truck.volume !== 0 && audio.truck.paused) audio.truck.play();
+                        else if (audio.truck.volume === 0 && !audio.truck.paused) audio.truck.pause();
+                        audio.train.volume = trainVolume;
+                        if (audio.train.volume !== 0 && audio.train.paused) audio.train.play();
+                        else if (audio.train.volume === 0 && !audio.train.paused) audio.train.pause();
+                        if (chunks[player.y].type === 2 && chunks[player.y].loadingTrain && chunks[player.y].loadingTrain < 40) audio.light.volume = 0.4;
+                        else if (player.y > 0 && chunks[player.y - 1].type === 2 && chunks[player.y - 1].loadingTrain && chunks[player.y - 1].loadingTrain < 40 || player.y < 13 && chunks[player.y + 1].loadingTrain && chunks[player.y + 1].type === 2 && chunks[player.y + 1].loadingTrain < 40) audio.light.volume = 0.2;
+                        else if (player.y > 1 && chunks[player.y - 2].type === 2 && chunks[player.y - 2].loadingTrain && chunks[player.y - 2].loadingTrain < 40 || player.y < 12 && chunks[player.y + 2].loadingTrain && chunks[player.y + 2].type === 2 && chunks[player.y + 2].loadingTrain < 40) audio.light.volume = 0.1;
+                        else if (player.y > 2 && chunks[player.y - 3].type === 2 && chunks[player.y - 3].loadingTrain && chunks[player.y - 3].loadingTrain < 40 || player.y < 11 && chunks[player.y + 3].loadingTrain && chunks[player.y + 3].type === 2 && chunks[player.y + 3].loadingTrain < 40) audio.light.volume = 0.05;
+                        else audio.light.volume = 0;
+                        if (audio.light.volume !== 0 && audio.light.paused) audio.light.play();
+                        else if (audio.light.volume === 0 && !audio.light.paused) audio.light.pause();
+                        if (chunks[player.y].type === 3) audio.river.volume = 0.2;
+                        else if (player.y > 0 && chunks[player.y - 1].type === 3 || player.y < 13 && chunks[player.y + 1].type === 3) audio.river.volume = 0.1;
+                        else if (player.y > 1 && chunks[player.y - 2].type === 3 || player.y < 12 && chunks[player.y + 2].type === 3) audio.river.volume = 0.05;
+                        else if (player.y > 2 && chunks[player.y - 3].type === 3 || player.y < 11 && chunks[player.y + 3].type === 3) audio.river.volume = 0.025;
+                        else audio.river.volume = 0;
+                        if (audio.river.volume !== 0 && audio.river.paused) audio.river.play();
+                        else if (audio.river.volume === 0 && !audio.river.paused) audio.river.pause();
+                    } else {
+                        audio.car.pause();
+                        audio.truck.pause();
+                        audio.train.pause();
+                        audio.light.pause();
+                        audio.river.pause();
+                    }
+                }
+
+                // New element loading
+                loadNewElement() {
+                    switch (this.type) {
+                        case 1:
+                            this.loadNewRoad();
+                            break;
+                        case 2:
+                            this.loadNewRail();
+                            break;
+                        case 3:
+                            this.loadNewRiver();
+                            break;
+                    }
+                }
+
+                // Road element loading
+                loadNewRoad() {
+                    if (this.loadingCar) {
+                        this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 4 - this.loadingCar : this.loadingCar + 3;
+                        this.loadingCar = 0;
+                    } else if (this.loadingTruck) {
+                        this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 8 - this.loadingTruck : this.loadingTruck + 5;
+                        if (this.loadingTruck === 3) this.loadingTruck = 0;
+                        else this.loadingTruck++;
+                    } else {
+                        const random = Math.random();
+
+                        if (random < 0.8) {
+                            this.elements[this.rightDirection ? 0 : 17] = 1;
+                        } else {
+                            if (random < 0.95) {
+                                this.loadingCar++;
+                                this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 4 : 3;
+                            } else {
+                                this.loadingTruck++;
+                                this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 8 : 5;
+                            }
+                        }
+                    }
+                }
+
+                // Rail element loading
+                loadNewRail() {
+                    if (this.loadingTrain) {
+                        if (this.loadingTrain > 19 && this.loadingTrain < 60) {
+                            if (this.loadingTrain === 20) this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 6 : 3;
+                            else if (this.loadingTrain === 59) this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 3 : 6;
+                            else if (this.loadingTrain % 2 === 1) this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 5 : 4;
+                            else this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 4 : 5;
+                        } else {
+                            this.elements[this.rightDirection ? 0 : 17] = 1;
+                        }
+
+                        if (this.loadingTrain === 79) this.loadingTrain = 0;
+                        else this.loadingTrain++;
+                    } else {
+                        const random = Math.random();
+                        this.elements[this.rightDirection ? 0 : 17] = 1;
+                        if (random < 0.01) this.loadingTrain++;
+                    }
+                }
+
+                // River element loading
+                loadNewRiver() {
+                    if (this.loadingLog2) {
+                        this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 11 - this.loadingLog2 : this.loadingLog2 + 10;
+                        this.loadingLog2 = 0;
+                    } else if (this.loadingLog3) {
+                        this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 9 - this.loadingLog3 : this.loadingLog3 + 7;
+                        if (this.loadingLog3 === 2) this.loadingLog3 = 0;
+                        else this.loadingLog3++;
+                    } else if (this.loadingLog4) {
+                        this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 6 - this.loadingLog4 : this.loadingLog4 + 3;
+                        if (this.loadingLog4 === 3) this.loadingLog4 = 0;
+                        else this.loadingLog4++;
+                    } else {
+                        const random = Math.random();
+                        if (random < 0.75) {
+                            this.elements[this.rightDirection ? 0 : 17] = 1;
+                        } else if (random < 0.85) {
+                            this.loadingLog4++;
+                            this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 6 : 3;
+                        } else if (random < 0.95) {
+                            this.loadingLog3++;
+                            this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 9 : 7;
+                        } else {
+                            this.loadingLog2++;
+                            this.elements[this.rightDirection ? 0 : 17] = this.rightDirection ? 11 : 10;
+                        }
+                    }
+                }
+            }
+
+            // Initialization of global consts
+            const menuMusic = document.getElementById("music");
+            const checkBox = document.getElementById("checkBox");
+            const container = document.getElementById("container");
+            const svg = document.getElementById("usernameSVG");
+            const form = document.getElementById("gameForm");
+            const username = document.getElementById("username");
+            const canvas = document.getElementById("gameCanvas");
+            const scoreboard = document.getElementById("highscorePage");
+            const highscores = document.getElementById("highscoreList");
+            const ctx = canvas.getContext("2d");
+            const unit = canvas.width / 16;
+            const chunks = [];
+            const player = {x: 9, y: 9};
+
+            // Initialization of image consts
+            const image = {
+                duck: createImage("image/duck.png"),
+                tree: createImage("image/tree.png"),
+                road: createImage("image/road.png"),
+                car: createImage("image/car.png"),
+                truck: createImage("image/truck.png"),
+                rail: createImage("image/rail.png"),
+                light: createImage("image/light.png"),
+                train: createImage("image/train.png"),
+                water: createImage("image/water.png"),
+                log: createImage("image/log.png"),
+                pause: createImage("image/pause.png"),
+                play: createImage("image/play.png"),
+                reset: createImage("image/reset.png"),
+                exit: createImage("image/exit.png")
+            };
+
+            // Initialization of audio consts
+            const audio = {
+                move: createAudio("audio/move.mp3"),
+                quack: createAudio("audio/quack.mp3"),
+                death: createAudio("audio/death.mp3"),
+                tree: createAudio("audio/tree.mp3"),
+                car: createAudio("audio/car.mp3"),
+                truck: createAudio("audio/truck.mp3"),
+                light: createAudio("audio/light.mp3"),
+                train: createAudio("audio/train.mp3"),
+                river: createAudio("audio/river.mp3"),
+                creak: createAudio("audio/creak.mp3")
+            };
+
+            // Initial game setup
+            audio.car.loop = true;
+            audio.truck.loop = true;
+            audio.light.loop = true;
+            audio.train.loop = true;
+            audio.river.loop = true;
+            audio.move.volume = 0.2;
+            audio.quack.volume = 0;
+            audio.death.volume = 0.8;
+            audio.tree.volume = 0.2;
+            audio.car.volume = 0;
+            audio.truck.volume = 0;
+            audio.light.volume = 0;
+            audio.train.volume = 0;
+            audio.river.volume = 0;
+            audio.creak.volume = 0.8;
+            let loadedGame = false;
+            let highscore = 0;
+            let gameBegan = false;
+            let gameReset = false;
+            let gameQuit = false;
+            let gameOver = false;
+            let gamePaused = 0;
+            let score = 0;
+            let position = 0;
+            let verticalStep = 0;
+            let verticalSpeed = 0;
+            let cannotQuack = false;
+            let duckRunning = false;
+            let duckRight = false;
+            let horizontalNudge = 0;
+            let verticalNudge = 0;
+            let cooldown = false;
+            let musicAllowed = false;
+            document.body.addEventListener("mousedown", () => musicAllowed = true);
+            document.body.addEventListener("keydown", () => musicAllowed = true);
+            form.addEventListener("submit", (e) => startGame(e));
+            username.addEventListener("input", () => svg.textContent = "Your highscore: " + (localStorage.getItem(username.value) ? localStorage.getItem(username.value) : "0"));
+
+            // Menu music check interval
+            setInterval(() => {
+                if (musicAllowed && checkBox.checked && canvas.style.display !== "block") {
+                    menuMusic.volume = 1;
+                    if (menuMusic.paused) menuMusic.play();
+                }
+            }, 100);
+
+            // Menu music toggle
+            function toggle(e) {
+                if (e.checked) {
+                    menuMusic.volume = 1;
+                    menuMusic.play();
+                } else {
+                    menuMusic.pause();
+                }
+            }
+
+            // Start game functionality
+            function startGame(e) {
+                e.preventDefault();
+
+                if (username.value.includes(' ')) {
+                    alert("Username has to contain 2-12 characters excluding whitespace!");
+                    return;
+                }
+
+                container.style.display = "none";
+                document.body.style.alignItems = "center";
+                canvas.style.display = "block";
+                const value = localStorage.getItem(username.value);
+                if (value) highscore = value;
+
+                if (!menuMusic.paused) {
+                    const decrement = menuMusic.volume / 20;
+
+                    const volumeDecreaseInterval = setInterval(() => {
+                        if (menuMusic.volume === 0 || container.style.display !== "none") {
+                            clearInterval(volumeDecreaseInterval);
+                            menuMusic.pause();
+                            menuMusic.currentTime = 0;
+                        } else {
+                            menuMusic.volume = Math.max(0, menuMusic.volume - decrement);
+                        }
+                    }, 200);
+                } else {
+                    menuMusic.currentTime = 0;
+                }
+
+                if (loadedGame) {
+                    resetGame();
+                } else {
+                    document.addEventListener("keyup", handleKeyPress);
+                    document.addEventListener("click", handleMouseClick);
+                    setInterval(() => audio.car.currentTime = 0, 3000);
+                    setInterval(() => audio.truck.currentTime = 0, 1500);
+                    setInterval(() => audio.light.currentTime = 0, 2000);
+                    setInterval(() => audio.train.currentTime = 0, 2000);
+                    setInterval(() => audio.river.currentTime = 0, 5000);
+                    setInterval(() => duckRunning = !duckRunning, 200);
+                    initializeChunks();
+                    update();
+                    loadedGame = true;
+                }
+            }
+
+            // Reset game functionality
+            function resetGame() {
+                for (let i = 0; i < 14; i++) chunks.pop();
+                player.x = 9;
+                player.y = 9;
+                gameBegan = false;
+                gameReset = false;
+                gameQuit = false;
+                gameOver = false;
+                gamePaused = 0;
+                score = 0;
+                position = 0;
+                verticalStep = 0;
+                verticalSpeed = 0;
+                cannotQuack = false;
+                duckRunning = false;
+                duckRight = false;
+                horizontalNudge = 0;
+                verticalNudge = 0;
+                cooldown = false;
+                initializeChunks();
+                update();
+            }
+
+            // Image initialization functionality
+            function createImage(src) {
+                const img = new Image();
+                img.src = src;
+                return img;
+            }
+
+            // Audio initialization functionality
+            function createAudio(src) {
+                return new Audio(src);
+            }
+
+            // Initialization of first 14 chunks. 7 preset, 7 randomized
+            function initializeChunks() {
+                let elements;
+                let previousChunk = [2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2];
+
+                for (let element = 0; element < 7; element++) {
+                    let previous;
+                    let prevPrevious;
+
+                    if (chunks.length === 0) {
+                        previous = 0;
+                        prevPrevious = 0;
+                    } else if (chunks.length === 1) {
+                        previous = chunks[chunks.length - 1].type;
+                        prevPrevious = 0;
+                    } else {
+                        previous = chunks[chunks.length - 1].type;
+                        prevPrevious = chunks[chunks.length - 2].type;
+                    }
+
+                    const random = Math.random();
+                    let type;
+
+                    if (previous !== prevPrevious) {
+                        switch (previous) {
+                            case 0:
+                                type = random < 0.5 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                                break;
+                            case 1:
+                                type = random < 0.2 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                                break;
+                            case 2:
+                                type = random < 0.2 ? 0 : random < 0.4 ? 1 : random < 0.8 ? 2 : 3;
+                                break;
+                            case 3:
+                                type = random < 0.2 ? 0 : random < 0.4 ? 1 : random < 0.5 ? 2 : 3;
+                                break;
+                        }
+                    } else {
+                        type = random < 0.4 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                    }
+
+                    const loading = {
+                        loadingCar: 0,
+                        loadingTruck: 0,
+                        loadingTrain: 0,
+                        loadingLog4: 0,
+                        loadingLog3: 0,
+                        loadingLog2: 0
+                    };
+
+                    switch (type) {
+                        case 0:
+                            elements = generatePlainChunk(previousChunk);
+                            break;
+                        case 1:
+                            elements = generateRoadChunk(loading);
+                            break;
+                        case 2:
+                            elements = generateRailChunk(loading);
+                            break;
+                        case 3:
+                            elements = generateRiverChunk(loading);
+                            break;
+                    }
+
+                    let previousDirection;
+                    let previousSpeed;
+
+                    if (chunks.length === 0) {
+                        previousDirection = 0;
+                        previousSpeed = 0;
+                    } else {
+                        previousDirection = chunks[chunks.length - 1].rightDirection;
+                        previousSpeed = chunks[chunks.length - 1].horizontalSpeed;
+                    }
+
+                    chunks.push(new Chunk(elements, type, previousDirection, previousSpeed));
+                    const lastChunk = chunks[chunks.length - 1];
+                    previousChunk = lastChunk.elements;
+
+                    if (!lastChunk.rightDirection) {
+                        lastChunk.loadingCar = loading.loadingCar;
+                        lastChunk.loadingTruck = loading.loadingTruck;
+                        lastChunk.loadingLog4 = loading.loadingLog4;
+                        lastChunk.loadingLog3 = loading.loadingLog3;
+                        lastChunk.loadingLog2 = loading.loadingLog2;
+                    }
+
+                    lastChunk.loadingTrain = loading.loadingTrain;
+                }
+
+                let temp = chunks[0];
+                chunks[0] = chunks[6];
+                chunks[6] = temp;
+                temp = chunks[1];
+                chunks[1] = chunks[5];
+                chunks[5] = temp;
+                temp = chunks[2];
+                chunks[2] = chunks[4];
+                chunks[4] = temp;
+                chunks.push(new Chunk([2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 0, 0, 0));
+                chunks.push(new Chunk([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2], 0, 0, 0));
+            }
+
+            // Generate plain chunk functionality
+            function generatePlainChunk(previousChunk) {
+                const elements = [];
+                const potentialBlockers = [];
+                let blocked = true;
+
+                for (let i = 0; i < 18; i++) {
+                    const random = Math.random();
+
+                    if (random < 0.5 && i > 1 && i < 16) {
+                        if (previousChunk[i] !== 2 && previousChunk[i] !== 0) {
+                            elements.push(1);
+                            blocked = false;
+                        } else {
+                            elements.push(0);
+                        }
+                    } else {
+                        elements.push(2);
+                        if (previousChunk[i] !== 2 && previousChunk[i] !== 0 && i > 1 && i < 16) potentialBlockers.push(i);
+                    }
+                }
+
+                if (blocked) elements[potentialBlockers[Math.floor(Math.random() * potentialBlockers.length)]] = 1;
+                return elements;
+            }
+
+            // Generate road chunk functionality
+            function generateRoadChunk(loading) {
+                const elements = [];
+
+                for (let i = 0; i < 18; i++) {
+                    if (loading.loadingCar) {
+                        elements.push(loading.loadingCar + 3);
+                        loading.loadingCar = 0;
+                    } else if (loading.loadingTruck) {
+                        elements.push(loading.loadingTruck + 5);
+                        if (loading.loadingTruck === 3) loading.loadingTruck = 0;
+                        else loading.loadingTruck++;
+                    } else {
+                        const random = Math.random();
+
+                        if (random < 0.8) {
+                            elements.push(1);
+                        } else {
+                            if (random < 0.95) {
+                                loading.loadingCar++;
+                                elements.push(3);
+                            } else {
+                                loading.loadingTruck++;
+                                elements.push(5);
+                            }
+                        }
+                    }
+                }
+
+                return elements;
+            }
+
+            // Generate rail chunk functionality
+            function generateRailChunk(loading) {
+                const elements = [];
+
+                for (let i = 0; i < 18; i++) {
+                    const random = Math.random();
+
+                    if (loading.loadingTrain) {
+                        elements.push(1);
+                        loading.loadingTrain++;
+                    } else {
+                        elements.push(1);
+                        if (random < 0.01) loading.loadingTrain++;
+                    }
+                }
+
+                return elements;
+            }
+
+            // Generate river chunk functionality
+            function generateRiverChunk(loading) {
+                const elements = [];
+
+                for (let i = 0; i < 18; i++) {
+                    if (loading.loadingLog2) {
+                        elements.push(loading.loadingLog2 + 10);
+                        loading.loadingLog2 = 0;
+                    } else if (loading.loadingLog3) {
+                        elements.push(loading.loadingLog3 + 7);
+                        if (loading.loadingLog3 === 2) loading.loadingLog3 = 0;
+                        else loading.loadingLog3++;
+                    } else if (loading.loadingLog4) {
+                        elements.push(loading.loadingLog4 + 3);
+                        if (loading.loadingLog4 === 3) loading.loadingLog4 = 0;
+                        else loading.loadingLog4++;
+                    } else {
+                        const random = Math.random();
+
+                        if (random < 0.75) {
+                            elements.push(1);
+                        } else if (random < 0.85) {
+                            loading.loadingLog4++;
+                            elements.push(3);
+                        } else if (random < 0.95) {
+                            loading.loadingLog3++;
+                            elements.push(7);
+                        } else {
+                            loading.loadingLog2++;
+                            elements.push(10);
+                        }
+                    }
+                }
+
+                return elements;
+            }
+
+            // React to arrow press
+            function handleKeyPress(event) {
+                if (!gameOver) {
+                    if (!gamePaused) {
+                        if (!cooldown) {
+                            switch (event.key) {
+                                case "ArrowLeft":
+                                case "a":
+                                    gameBegan = true;
+                                    move("left");
+                                    break;
+                                case "ArrowRight":
+                                case "d":
+                                    gameBegan = true;
+                                    move("right");
+                                    break;
+                                case "ArrowUp":
+                                case "w":
+                                    gameBegan = true;
+                                    move("up");
+                                    break;
+                                case "ArrowDown":
+                                case "s":
+                                    gameBegan = true;
+                                    move("down");
+                                    break;
+                                case "Escape":
+                                    if (gameBegan) {
+                                        gamePaused++;
+                                        audio.car.pause();
+                                        audio.truck.pause();
+                                        audio.light.pause();
+                                        audio.train.pause();
+                                        audio.river.pause();
+                                    } else {
+                                        gamePaused++;
+                                        audio.car.pause();
+                                        audio.truck.pause();
+                                        audio.light.pause();
+                                        audio.train.pause();
+                                        audio.river.pause();
+                                        gameQuit = true;
+                                        gameOver = true;
+                                    }
+
+                                    break;
+                            }
+
+                            cooldown = true;
+                            setTimeout(() => cooldown = false, 100);
+                        }
+                    } else if (event.key === "Escape") {
+                        gamePaused = 0;
+                    }
+                }
+            }
+
+            // React to mouse click
+            function handleMouseClick(event) {
+                if (!gameOver) {
+                    const size = canvas.offsetWidth / 16;
+
+                    if (document.body.offsetWidth * 0.75 > document.body.offsetHeight) {
+                        if (event.x > canvas.offsetLeft && event.x < canvas.offsetLeft + canvas.offsetWidth && event.y > canvas.offsetTop && event.y < canvas.offsetTop + canvas.offsetHeight) {
+                            if (gameBegan && !gamePaused && event.x > canvas.offsetLeft + size * 15 && event.y < canvas.offsetTop + size) {
+                                gamePaused++;
+                                audio.car.pause();
+                                audio.truck.pause();
+                                audio.light.pause();
+                                audio.train.pause();
+                                audio.river.pause();
+                            } else if (gamePaused) {
+                                if (event.x > canvas.offsetLeft + size * 5 && event.x < canvas.offsetLeft + size * 7 && event.y > canvas.offsetTop + size * 5 && event.y < canvas.offsetTop + size * 7) {
+                                    gameQuit = true;
+                                    gameOver = true;
+                                } else if (event.x > canvas.offsetLeft + size * 7 && event.x < canvas.offsetLeft + size * 9 && event.y > canvas.offsetTop + size * 5 && event.y < canvas.offsetTop + size * 7) {
+                                    gamePaused = 0;
+                                } else if (event.x > canvas.offsetLeft + size * 9 && event.x < canvas.offsetLeft + size * 11 && event.y > canvas.offsetTop + size * 5 && event.y < canvas.offsetTop + size * 7) {
+                                    gamePaused = 0;
+                                    gameReset = true;
+                                    gameOver = true;
+                                }
+                            } else if (!gamePaused && !cooldown) {
+                                gameBegan = true;
+                                const leftDistX = event.x - (canvas.offsetLeft + (player.x - 1) * size);
+                                const leftDistY = event.y - (canvas.offsetTop + (player.y - 1) * size + Math.floor(size / 2));
+                                const rightDistX = event.x - (canvas.offsetLeft + (player.x - 1) * size + size);
+                                const rightDistY = event.y - (canvas.offsetTop + (player.y - 1) * size + Math.floor(size / 2));
+                                const upDistX = event.x - (canvas.offsetLeft + (player.x - 1) * size + Math.floor(size / 2));
+                                const upDistY = event.y - (canvas.offsetTop + (player.y - 1) * size);
+                                const downDistX = event.x - (canvas.offsetLeft + (player.x - 1) * size + Math.floor(size / 2));
+                                const downDistY = event.y - (canvas.offsetTop + (player.y - 1) * size + size);
+                                const leftDist = Math.sqrt(leftDistX * leftDistX + leftDistY * leftDistY);
+                                const rightDist = Math.sqrt(rightDistX * rightDistX + rightDistY * rightDistY);
+                                const upDist = Math.sqrt(upDistX * upDistX + upDistY * upDistY);
+                                const downDist = Math.sqrt(downDistX * downDistX + downDistY * downDistY);
+                                if (leftDist <= rightDist && leftDist <= upDist && leftDist <= downDist) move("left");
+                                else if (rightDist <= leftDist && rightDist <= upDist && rightDist <= downDist) move("right");
+                                else if (upDist <= leftDist && upDist <= rightDist && upDist <= downDist) move("up");
+                                else move("down");
+                                cooldown = true;
+                                setTimeout(() => cooldown = false, 100);
+                            }
+                        }
+                    } else {
+                        if (event.x > canvas.offsetLeft + size * 2 && event.x < canvas.offsetLeft + canvas.offsetWidth - size * 2 && event.y > canvas.offsetTop - size * 2 && event.y < canvas.offsetTop + canvas.offsetHeight + size * 2) {
+                            if (gameBegan && !gamePaused && event.x > canvas.offsetLeft + canvas.offsetWidth - 3 * size && event.y > canvas.offsetTop + canvas.offsetHeight + size) {
+                                gamePaused++;
+                                audio.car.pause();
+                                audio.truck.pause();
+                                audio.light.pause();
+                                audio.train.pause();
+                                audio.river.pause();
+                            } else if (gamePaused) {
+                                if (event.x > canvas.offsetLeft + size * 7 && event.x < canvas.offsetLeft + size * 9 && event.y > canvas.offsetTop + size * 3 && event.y < canvas.offsetTop + size * 5) {
+                                    gameQuit = true;
+                                    gameOver = true;
+                                } else if (event.x > canvas.offsetLeft + size * 7 && event.x < canvas.offsetLeft + size * 9 && event.y > canvas.offsetTop + size * 5 && event.y < canvas.offsetTop + size * 7) {
+                                    gamePaused = 0;
+                                } else if (event.x > canvas.offsetLeft + size * 7 && event.x < canvas.offsetLeft + size * 9 && event.y > canvas.offsetTop + size * 7 && event.y < canvas.offsetTop + size * 9) {
+                                    gamePaused = 0;
+                                    gameReset = true;
+                                    gameOver = true;
+                                }
+                            } else if (!gamePaused && !cooldown) {
+                                gameBegan = true;
+                                const leftDistX = event.y - (canvas.offsetTop - size * 2 + (player.x - 1) * size);
+                                const leftDistY = event.x - (canvas.offsetLeft + size * 2 + (12 - player.y) * size + Math.floor(size / 2));
+                                const rightDistX = event.y - (canvas.offsetTop - size * 2 + (player.x - 1) * size + size);
+                                const rightDistY = event.x - (canvas.offsetLeft + size * 2 + (12 - player.y) * size + Math.floor(size / 2));
+                                const upDistX = event.y - (canvas.offsetTop - size * 2 + (player.x - 1) * size + Math.floor(size / 2));
+                                const upDistY = event.x - (canvas.offsetLeft + size * 2 + (12 - player.y) * size + size);
+                                const downDistX = event.y - (canvas.offsetTop - size * 2 + (player.x - 1) * size + Math.floor(size / 2));
+                                const downDistY = event.x - (canvas.offsetLeft + size * 2 + (12 - player.y) * size);
+                                const leftDist = Math.sqrt(leftDistX * leftDistX + leftDistY * leftDistY);
+                                const rightDist = Math.sqrt(rightDistX * rightDistX + rightDistY * rightDistY);
+                                const upDist = Math.sqrt(upDistX * upDistX + upDistY * upDistY);
+                                const downDist = Math.sqrt(downDistX * downDistX + downDistY * downDistY);
+                                if (leftDist <= rightDist && leftDist <= upDist && leftDist <= downDist) move("left");
+                                else if (rightDist <= leftDist && rightDist <= upDist && rightDist <= downDist) move("right");
+                                else if (upDist <= leftDist && upDist <= rightDist && upDist <= downDist) move("up");
+                                else move("down");
+                                cooldown = true;
+                                setTimeout(() => cooldown = false, 100);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Handle player movement
+            function move(direction) {
+                if (direction === "left" && player.x > 1 && chunks[player.y].elements[player.x - 1] !== 2) {
+                    duckRight = false;
+                    player.x--;
+                    if (chunks[player.y].type === 3 && chunks[player.y].elements[player.x] !== 1) audio.creak.play();
+                    audio.move.play();
+                    const quack = Math.random();
+
+                    if (!cannotQuack && quack < 0.2) {
+                        cannotQuack = true;
+                        audio.quack.volume = 0.1 + Math.round(quack * 10) / 10;
+                        audio.quack.play();
+                        setTimeout(() => cannotQuack = false, 5000);
+                    }
+                } else if (direction === "right" && player.x < 16 && chunks[player.y].elements[player.x + 1] !== 2) {
+                    duckRight = true;
+                    player.x++;
+                    if (chunks[player.y].type === 3 && chunks[player.y].elements[player.x] !== 1) audio.creak.play();
+                    audio.move.play();
+                    const quack = Math.random();
+
+                    if (!cannotQuack && quack < 0.2) {
+                        cannotQuack = true;
+                        audio.quack.volume = 0.1 + Math.round(quack * 10) / 10;
+                        audio.quack.play();
+                        setTimeout(() => cannotQuack = false, 5000);
+                    }
+                } else if (direction === "up" && player.y > 1 && chunks[player.y - 1].elements[player.x] !== 2) {
+                    player.y--;
+                    if (chunks[player.y].type === 3 && chunks[player.y].elements[player.x] !== 1) audio.creak.play();
+                    audio.move.play();
+                    const quack = Math.random();
+
+                    if (!cannotQuack && quack < 0.2) {
+                        cannotQuack = true;
+                        audio.quack.volume = 0.1 + Math.round(quack * 10) / 10;
+                        audio.quack.play();
+                        setTimeout(() => cannotQuack = false, 5000);
+                    }
+
+                    position++;
+
+                    if (position > score) {
+                        score++;
+                        if (score > highscore) highscore++;
+                    }
+                } else if (direction === "down" && chunks[player.y + 1].elements[player.x] !== 2) {
+                    player.y++;
+                    if (chunks[player.y].type === 3 && chunks[player.y].elements[player.x] !== 1) audio.creak.play();
+                    audio.move.play();
+                    const quack = Math.random();
+
+                    if (!cannotQuack && quack < 0.2) {
+                        cannotQuack = true;
+                        audio.quack.volume = 0.1 + Math.round(quack * 10) / 10;
+                        audio.quack.play();
+                        setTimeout(() => cannotQuack = false, 5000);
+                    }
+
+                    position--;
+                } else {
+                    if (direction === "left") duckRight = false;
+                    else if (direction === "right") duckRight = true;
+                    nudge(direction);
+                }
+            }
+
+            // Handle failed player movement
+            function nudge(direction) {
+                switch (direction) {
+                    case "left":
+                        horizontalNudge = -10;
+                        audio.tree.play();
+                        setTimeout(() => horizontalNudge = 0, 100);
+                        break;
+                    case "right":
+                        horizontalNudge = 10;
+                        audio.tree.play();
+                        setTimeout(() => horizontalNudge = 0, 100);
+                        break;
+                    case "up":
+                        verticalNudge = -10;
+                        audio.tree.play();
+                        setTimeout(() => verticalNudge = 0, 100);
+                        break;
+                    case "down":
+                        verticalNudge = 10;
+                        audio.tree.play();
+                        setTimeout(() => verticalNudge = 0, 100);
+                        break;
+                }
+            }
+
+            // Update and repaint game canvas to reflect changes
+            function update() {
+                if (gamePaused !== 2) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    draw();
+                    ctx.fillStyle = "white";
+                    ctx.font = "bold " + unit + "px Cursive";
+                    ctx.fillText("SCORE: " + score.toString(), Math.round(unit / 10), unit);
+                    ctx.font = "bold " + Math.floor(unit / 2) + "px Cursive";
+                    ctx.fillText("HIGHSCORE: " + highscore.toString(), Math.round(unit / 10), Math.round(unit * 1.75));
+
+                    if (!gameBegan) {
+                        ctx.font = "bold " + Math.floor(unit * 2) + "px Cursive";
+                        ctx.fillText("CROSSY ROAD", Math.round(unit * 0.75), Math.round(unit * 5.5));
+                        ctx.fillText("REIMAGINED", Math.round(unit * 1.25), Math.round(unit * 7.5));
+                    } else {
+                        if (gamePaused) {
+                            gamePaused++;
+                            ctx.globalAlpha = 0.5;
+                            ctx.fillStyle = "black";
+                            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                            ctx.globalAlpha = 1;
+                            ctx.drawImage(image.exit, 0, 0, unit * 2, unit * 2, unit * 5, unit * 5, unit * 2, unit * 2);
+                            ctx.drawImage(image.play, 0, 0, unit * 2, unit * 2, unit * 7, unit * 5, unit * 2, unit * 2);
+                            ctx.drawImage(image.reset, 0, 0, unit * 2, unit * 2, unit * 9, unit * 5, unit * 2, unit * 2);
+                        } else {
+                            ctx.drawImage(image.pause, 0, 0, unit, unit, unit * 15, 0, unit, unit);
+                        }
+                    }
+                }
+
+                if (!gameOver) {
+                    requestAnimationFrame(update);
+                } else {
+                    if (gameReset) {
+                        resetGame();
+                    } else if (gameQuit) {
+                        canvas.style.display = "none";
+                        document.body.style.alignItems = "start";
+                        container.style.display = "flex";
+                        svg.textContent = "Your highscore: " + (localStorage.getItem(username.value) ? localStorage.getItem(username.value) : "0");
+                    } else {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        draw();
+                        ctx.fillStyle = "white";
+                        ctx.font = "bold " + unit + "px Cursive";
+                        ctx.fillText("SCORE: " + score.toString(), Math.round(unit / 10), unit);
+                        ctx.font = "bold " + Math.floor(unit / 2) + "px Cursive";
+                        ctx.fillText("HIGHSCORE: " + highscore.toString(), Math.round(unit / 10), Math.round(unit * 1.75));
+                        ctx.globalAlpha = 0.25;
+                        ctx.fillStyle = "red";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        ctx.globalAlpha = 1;
+                        audio.car.pause();
+                        audio.truck.pause();
+                        audio.light.pause();
+                        audio.train.pause();
+                        audio.river.pause();
+                        audio.death.play();
+                        setTimeout(() => resetGame(), 1000);
+                    }
+
+                    localStorage.setItem(username.value, highscore);
+                }
+            }
+
+            // Draw sprites on canvas
+            function draw() {
+                for (let y = 0; y < 14; y++) {
+                    const chunk = chunks[y];
+                    const chunkType = chunk.type;
+
+                    switch (chunkType) {
+                        case 0:
+                            for (let x = 0; x < 18; x++) {
+                                if (chunk.elements[x] === 2) ctx.drawImage(image.tree, 0, 0, 50, 50, x * unit - unit, y * unit - unit + verticalStep, unit, unit);
+                            }
+
+                            break;
+                        case 1:
+                            for (let x = 0; x < 18; x++) ctx.drawImage(image.road, 0, 0, 50, 50, x * unit - unit, y * unit - unit + verticalStep, unit, unit);
+                            drawVehicles(chunk, y);
+                            break;
+                        case 2:
+                            for (let x = 0; x < 18; x++) ctx.drawImage(image.rail, 0, 0, 50, 50, x * unit - unit, y * unit - unit + verticalStep, unit, unit);
+                            drawTrain(chunk, y);
+                            break;
+                        case 3:
+                            for (let x = 0; x < 18; x++) ctx.drawImage(image.water, 0, 0, 50, 50, x * unit - unit, y * unit - unit + verticalStep, unit, unit);
+                            drawLogs(chunk, y);
+                            break;
+                    }
+
+                    chunk.stepElements(y === player.y && chunkType === 3 ? player : null);
+                }
+
+                ctx.drawImage(image.duck, (duckRunning ? 50 : 0) + (gameOver ? 100 : 0), duckRight ? 50 : 0, 50, 50, player.x * unit - unit + (chunks[player.y].type === 3 ? chunks[player.y].horizontalStep : 0) + horizontalNudge, player.y * unit - unit + verticalStep + verticalNudge, unit, unit);
+                updateChunkSpeed();
+            }
+
+            // Draw vehicle sprites on canvas
+            function drawVehicles(chunk, y) {
+                for (let x = 0; x < 18; x++) {
+                    const elementType = chunk.elements[x];
+                    if (elementType === 1) continue;
+                    if (x === player.x && y === player.y) gameOver = true;
+
+                    switch (elementType) {
+                        case 3:
+                            if (chunk.rightDirection) ctx.drawImage(image.car, 0, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.car, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 4:
+                            if (chunk.rightDirection) ctx.drawImage(image.car, 50, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.car, 50, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 5:
+                            if (chunk.rightDirection) ctx.drawImage(image.truck, 0, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.truck, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 6:
+                            if (chunk.rightDirection) ctx.drawImage(image.truck, 50, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.truck, 50, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 7:
+                            if (chunk.rightDirection) ctx.drawImage(image.truck, 100, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.truck, 100, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 8:
+                            if (chunk.rightDirection) ctx.drawImage(image.truck, 150, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.truck, 150, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                    }
+                }
+            }
+
+            // Draw train sprites on canvas
+            function drawTrain(chunk, y) {
+                for (let x = 0; x < 18; x++) {
+                    const elementType = chunk.elements[x];
+                    if (elementType === 1) continue;
+                    if (x === player.x && y === player.y) gameOver = true;
+
+                    switch (elementType) {
+                        case 3:
+                            if (chunk.rightDirection) ctx.drawImage(image.train, 0, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.train, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 4:
+                            if (chunk.rightDirection) ctx.drawImage(image.train, 50, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.train, 50, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 5:
+                            if (chunk.rightDirection) ctx.drawImage(image.train, 100, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.train, 100, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                        case 6:
+                            if (chunk.rightDirection) ctx.drawImage(image.train, 150, 50, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            else ctx.drawImage(image.train, 150, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                            break;
+                    }
+                }
+
+                ctx.drawImage(image.light, chunk.loadingTrain && chunk.loadingTrain < 40 ? 50 : 0, 0, 50, 50, 9 * unit - unit, y * unit - unit + verticalStep, unit, unit);
+            }
+
+            // Draw log sprites on canvas
+            function drawLogs(chunk, y) {
+                for (let x = 0; x < 18; x++) {
+                    const elementType = chunk.elements[x];
+                    if (elementType === 1 && x === player.x && y === player.y) gameOver = true;
+                    else if (elementType === 3) ctx.drawImage(image.log, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 4) ctx.drawImage(image.log, 50, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 5) ctx.drawImage(image.log, 100, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 6) ctx.drawImage(image.log, 150, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 7) ctx.drawImage(image.log, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 8) ctx.drawImage(image.log, 50, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 9) ctx.drawImage(image.log, 150, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 10) ctx.drawImage(image.log, 0, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                    else if (elementType === 11) ctx.drawImage(image.log, 150, 0, 50, 50, x * unit - unit + chunk.horizontalStep, y * unit - unit + verticalStep, unit, unit);
+                }
+            }
+
+            // Change chunk movement speed based on player location
+            function updateChunkSpeed() {
+                if (player.x < 1 || player.x > 16) gameOver = true;
+
+                if (gameBegan) {
+                    switch (player.y) {
+                        case 1:
+                            verticalSpeed = 10;
+                            break;
+                        case 2:
+                            verticalSpeed = 7;
+                            break;
+                        case 3:
+                            verticalSpeed = 5;
+                            break;
+                        case 4:
+                            verticalSpeed = 4;
+                            break;
+                        case 5:
+                            verticalSpeed = 3;
+                            break;
+                        case 6:
+                            verticalSpeed = 2;
+                            break;
+                        case 7:
+                            verticalSpeed = 2;
+                            break;
+                        case 8:
+                            verticalSpeed = 1;
+                            break;
+                        case 9:
+                            verticalSpeed = 1;
+                            break;
+                        case 10:
+                            verticalSpeed = 1;
+                            break;
+                        case 11:
+                            verticalSpeed = 1;
+                            break;
+                        case 12:
+                            verticalSpeed = 1;
+                            break;
+                        default:
+                            gameOver = true;
+                    }
+                } else {
+                    verticalSpeed = 0;
+                }
+
+                verticalStep += verticalSpeed;
+                if (verticalStep >= Math.floor(unit / 2)) generateNewChunk();
+            }
+
+            // Chunk generation functionality
+            function generateNewChunk() {
+                for (let i = 13; i > 0; i--) chunks[i] = chunks[i - 1];
+                let elements = [];
+                let previous = chunks[1].type;
+                let prevPrevious = chunks[2].type;
+                const random = Math.random();
+                let type;
+
+                if (previous !== prevPrevious) {
+                    switch (previous) {
+                        case 0:
+                            type = random < 0.5 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                            break;
+                        case 1:
+                            type = random < 0.2 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                            break;
+                        case 2:
+                            type = random < 0.2 ? 0 : random < 0.4 ? 1 : random < 0.8 ? 2 : 3;
+                            break;
+                        case 3:
+                            type = random < 0.2 ? 0 : random < 0.4 ? 1 : random < 0.5 ? 2 : 3;
+                            break;
+                    }
+                } else {
+                    type = random < 0.4 ? 0 : random < 0.7 ? 1 : random < 0.8 ? 2 : 3;
+                }
+
+                const loading = {
+                    loadingCar: 0,
+                    loadingTruck: 0,
+                    loadingTrain: 0,
+                    loadingLog4: 0,
+                    loadingLog3: 0,
+                    loadingLog2: 0
+                };
+
+                switch (type) {
+                    case 0:
+                        elements = generatePlainChunk(chunks[1].elements);
+                        break;
+                    case 1:
+                        elements = generateRoadChunk(loading);
+                        break;
+                    case 2:
+                        elements = generateRailChunk(loading);
+                        break;
+                    case 3:
+                        elements = generateRiverChunk(loading);
+                        break;
+                }
+
+                chunks[0] = new Chunk(elements, type, chunks[1].rightDirection, chunks[1].horizontalSpeed);
+
+                if (!chunks[0].rightDirection) {
+                    chunks[0].loadingCar = loading.loadingCar;
+                    chunks[0].loadingTruck = loading.loadingTruck;
+                    chunks[0].loadingLog4 = loading.loadingLog4;
+                    chunks[0].loadingLog3 = loading.loadingLog3;
+                    chunks[0].loadingLog2 = loading.loadingLog2;
+                }
+
+                chunks[0].loadingTrain = loading.loadingTrain;
+                verticalStep -= unit;
+                player.y++;
+            }
+        </script>
+    </body>
+</html>
